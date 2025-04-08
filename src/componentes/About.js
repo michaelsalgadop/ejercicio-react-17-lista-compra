@@ -1,6 +1,6 @@
 export const About = (props) => {
   return (
-    <main class="acerca-de">
+    <main className="acerca-de">
       <h2>Acerca de Lista de la compra</h2>
       <p>
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem officia
