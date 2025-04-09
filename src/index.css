@@ -2,7 +2,9 @@
   --color-primario: #f87500;
   --color-secundario: #5e81d1;
   --color-primario-claro: #ff8d27;
+  --color-seccion-compras-hover: #c16b1e;
   --color-texto: #212529;
+  --color-texto-hover: #fff;
   --espacio-lateral: 23px;
   --espacio-vertical: 53px;
 }
@@ -42,6 +44,12 @@ button {
 }
 body {
   background-color: var(--color-primario-claro);
+}
+.pointer {
+  cursor: pointer !important;
+}
+.text-center {
+  text-align: center !important;
 }
 .cabecera {
   background-color: var(--color-secundario);
@@ -88,6 +96,10 @@ i.icono {
   font-size: 20px;
   margin-bottom: 10px;
 }
+.articulo:hover {
+  background-color: var(--color-seccion-compras-hover);
+  color: var(--color-texto-hover);
+}
 .marcar {
   width: 20px;
   height: 20px;
@@ -109,6 +121,9 @@ i.icono {
 }
 .nombre {
   flex: 1;
+}
+.nombre.tachado {
+  text-decoration: line-through;
 }
 .titulo-seccion {
   margin-bottom: 20px;
@@ -149,4 +164,32 @@ i.icono {
 
 .not-found-container .title {
   font-size: 50px;
+}
+.label-formulario {
+  display: block;
+}
+.moneda {
+  margin-left: 10px;
+}
+.titulo-seccion {
+  margin-bottom: 20px;
+}
+.campo-formulario {
+  margin-bottom: 15px;
+}
+.input-formulario,
+.btn-formulario {
+  padding: 10px 5px;
+  border: none;
+  outline: none;
+}
+.input-formulario {
+  width: 250px;
+}
+
+.btn-formulario {
+  font-size: 17px;
+  background-color: var(--color-secundario);
+  color: #fff;
+  cursor: pointer;
 }

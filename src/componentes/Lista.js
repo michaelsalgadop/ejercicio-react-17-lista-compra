@@ -1,12 +1,11 @@
 import { useContext, useMemo } from "react";
 import { ListadoContext } from "../context/ListadoContext";
+import { useNavigate } from "react-router-dom";
+import { InfoArticulos } from "./InfoArticulos";
 
 export const Lista = () => {
-  const { listaCompra } = useContext(ListadoContext);
-  const articulosComprados = useMemo(
-    () => listaCompra.filter((articulo) => articulo.comprado).length,
-    [listaCompra]
-  );
+  const { listaCompra, setListaCompra } = useContext(ListadoContext);
+  const navigate = useNavigate();
   const totalComprado = useMemo(
     () =>
       listaCompra
@@ -18,28 +17,60 @@ export const Lista = () => {
         ),
     [listaCompra]
   );
+
+  const comprarProducto = (idProducto) =>
+    setListaCompra(
+      listaCompra.map((articulo) =>
+        articulo.id === idProducto
+          ? { ...articulo, comprado: !articulo.comprado }
+          : articulo
+      )
+    );
+  const crearProducto = () => navigate("/productos/crear-producto");
+  const modificarProducto = (id) => navigate(`/productos/${id}`);
+  const eliminarProducto = (idProducto) =>
+    setListaCompra(
+      listaCompra.filter((articulo) => articulo.id !== idProducto)
+    );
   return (
     <>
-      <section className="info espaciado bloque-superior">
-        <i className="icono fas fa-plus-circle"></i>
-        <p className="n-articulos">
-          {articulosComprados}/{listaCompra.length} comprados
-        </p>
-      </section>
+      <InfoArticulos accion={crearProducto}></InfoArticulos>
       <main className="principal espaciado">
-        <ul className="articulos">
-          {listaCompra.map(({ id, nombre, precio, comprado }) => (
-            <li className="articulo" key={id}>
-              <input type="checkbox" className="marcar" checked={comprado} />
-              <span className="nombre">{nombre}</span>
-              <span className="precio">
-                {precio ? `${precio.toFixed(2)}€` : ""}
-              </span>
-              <i className="borrar fas fa-times"></i>
-            </li>
-          ))}
-        </ul>
-        <span className="precio-total">{totalComprado.toFixed(2)}€</span>
+        {listaCompra.length === 0 ? (
+          <p className="text-center">No hay productos a mostrar ahora mismo.</p>
+        ) : (
+          <>
+            <ul className="articulos">
+              {listaCompra.map(({ id, nombre, precio, comprado }) => (
+                <li className="articulo pointer" key={id}>
+                  <input
+                    type="checkbox"
+                    className="marcar"
+                    checked={comprado}
+                    onChange={() => comprarProducto(id)}
+                  />
+                  <span
+                    className={`nombre ${comprado ? "tachado" : ""}`}
+                    onClick={() => modificarProducto(id)}
+                  >
+                    {nombre}
+                  </span>
+                  <span
+                    className="precio pointer"
+                    onClick={() => modificarProducto(id)}
+                  >
+                    {precio ? `${precio.toFixed(2)}€` : ""}
+                  </span>
+                  <i
+                    className="borrar fas fa-times"
+                    onClick={() => eliminarProducto(id)}
+                  ></i>
+                </li>
+              ))}
+            </ul>
+            <span className="precio-total">{totalComprado.toFixed(2)}€</span>
+          </>
+        )}
       </main>
     </>
   );
