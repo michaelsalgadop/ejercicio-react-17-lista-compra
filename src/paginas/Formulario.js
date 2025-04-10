@@ -1,34 +1,58 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { InfoArticulos } from "./InfoArticulos";
+import { InfoArticulos } from "../componentes/InfoArticulos";
 import { useNavigate, useParams } from "react-router-dom";
 import { ListadoContext } from "../context/ListadoContext";
 import { useFormulario } from "../hooks/useFormulario";
+import { useCRUD } from "../hooks/useCRUD";
 
 export const Formulario = () => {
   const { idProducto } = useParams();
-  const { listaCompra, setListaCompra } = useContext(ListadoContext);
-  const buscarProductoPorId = useCallback(
-    () =>
-      listaCompra.find(
-        (producto) => parseInt(producto.id) === parseInt(idProducto)
-      ),
-    [idProducto, listaCompra]
-  );
+
+  const { listaCompra, setListaCompra, urlListaCompra, buscarProductoPorId } =
+    useContext(ListadoContext);
+
   const [productoEditar, setProductoEditar] = useState({
     id: idProducto,
     nombre: "",
     precio: 0.0,
     comprado: false,
   });
+
   const { setData, datosFormulario, setDatosFormulario } =
     useFormulario(productoEditar);
+  const { crear, actualizar } = useCRUD();
   const navigate = useNavigate();
+
   const volver = () => navigate("/lista");
-  const crearEditarProducto = (e) => {
+
+  const crearProducto = async (e) => {
     e.preventDefault();
     try {
       if (datosFormulario.id === 0) return;
-      if (idProducto) {
+      const respuesta = await crear(urlListaCompra, datosFormulario);
+      if (respuesta.ok) {
+        const nuevoArticulo = respuesta.objeto;
+        setListaCompra([...listaCompra, nuevoArticulo]);
+      }
+      volver();
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const editarProducto = async (e) => {
+    e.preventDefault();
+    try {
+      if (datosFormulario.id === 0) return;
+      const nuevoArticulo = {
+        ...buscarProductoPorId(idProducto),
+        ...datosFormulario,
+      };
+      const respuesta = await actualizar(
+        urlListaCompra + idProducto,
+        nuevoArticulo
+      );
+      if (respuesta.ok) {
         setListaCompra(
           listaCompra.map((articulo) =>
             parseInt(articulo.id) === parseInt(idProducto)
@@ -36,39 +60,46 @@ export const Formulario = () => {
               : articulo
           )
         );
-      } else {
-        setListaCompra([...listaCompra, datosFormulario]);
       }
       volver();
     } catch (error) {
       console.error(error.message);
     }
   };
+
   const getLastId = useCallback(
     () =>
       parseInt(
-        listaCompra.reduce(
-          (acumulador, producto) =>
-            parseInt(producto.id) > acumulador
-              ? (acumulador = parseInt(producto.id))
-              : acumulador,
-          0
-        )
+        listaCompra.length > 0
+          ? listaCompra.reduce(
+              (acumulador, producto) =>
+                parseInt(producto.id) > acumulador
+                  ? (acumulador = parseInt(producto.id))
+                  : acumulador,
+              0
+            )
+          : 0
       ),
     [listaCompra]
   );
+
   useEffect(() => {
-    if (listaCompra.length === 0) return;
-    const productoEncontrado = buscarProductoPorId();
+    const productoEncontrado = buscarProductoPorId(idProducto);
     setDatosFormulario((prev) =>
       !productoEncontrado
         ? {
             ...prev,
-            id: getLastId() + 1,
+            id: (getLastId() + 1).toString(),
           }
         : productoEncontrado
     );
-  }, [listaCompra, getLastId, buscarProductoPorId, setDatosFormulario]);
+  }, [
+    listaCompra,
+    getLastId,
+    buscarProductoPorId,
+    setDatosFormulario,
+    idProducto,
+  ]);
   const { nombre, precio } = datosFormulario;
   return (
     <>
@@ -77,7 +108,10 @@ export const Formulario = () => {
         <h2 className="titulo-seccion">
           {idProducto ? "Editar" : "Crear"} artículo
         </h2>
-        <form className="form" onSubmit={crearEditarProducto}>
+        <form
+          className="form"
+          onSubmit={idProducto ? editarProducto : crearProducto}
+        >
           <div className="campo-formulario">
             <label className="label-formulario" htmlFor="nombre">
               Nombre:

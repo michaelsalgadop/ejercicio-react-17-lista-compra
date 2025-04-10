@@ -2,11 +2,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ListadoContext } from "./context/ListadoContext";
 import { Cabecera } from "./componentes/Cabecera";
-import { Principal } from "./componentes/Principal";
+import { Principal } from "./paginas/Principal";
 import { PageNotFound } from "./componentes/PageNotFound";
-import { Lista } from "./componentes/Lista";
-import { About } from "./componentes/About";
-import { Formulario } from "./componentes/Formulario";
+import { Lista } from "./paginas/Lista";
+import { About } from "./paginas/About";
+import { Formulario } from "./paginas/Formulario";
 
 function App() {
   const [listaCompra, setListaCompra] = useState([]);
@@ -23,6 +23,13 @@ function App() {
       console.error(error.message);
     }
   }, [urlListaCompra]);
+  const buscarProductoPorId = useCallback(
+    (idProducto) =>
+      listaCompra.find(
+        (producto) => parseInt(producto.id) === parseInt(idProducto)
+      ),
+    [listaCompra]
+  );
   const articulosComprados = useMemo(
     () => listaCompra.filter((articulo) => articulo.comprado).length,
     [listaCompra]
@@ -37,6 +44,8 @@ function App() {
           listaCompra,
           setListaCompra,
           articulosComprados,
+          urlListaCompra,
+          buscarProductoPorId,
         }}
       >
         <Router>

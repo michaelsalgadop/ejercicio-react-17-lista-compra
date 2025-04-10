@@ -1,11 +1,14 @@
 import { useContext, useMemo } from "react";
 import { ListadoContext } from "../context/ListadoContext";
 import { useNavigate } from "react-router-dom";
-import { InfoArticulos } from "./InfoArticulos";
+import { InfoArticulos } from "../componentes/InfoArticulos";
+import { useCRUD } from "../hooks/useCRUD";
 
 export const Lista = () => {
-  const { listaCompra, setListaCompra } = useContext(ListadoContext);
+  const { listaCompra, setListaCompra, urlListaCompra, buscarProductoPorId } =
+    useContext(ListadoContext);
   const navigate = useNavigate();
+  const { eliminar, actualizar } = useCRUD();
   const totalComprado = useMemo(
     () =>
       listaCompra
@@ -18,20 +21,33 @@ export const Lista = () => {
     [listaCompra]
   );
 
-  const comprarProducto = (idProducto) =>
-    setListaCompra(
-      listaCompra.map((articulo) =>
-        articulo.id === idProducto
-          ? { ...articulo, comprado: !articulo.comprado }
-          : articulo
-      )
-    );
+  const comprarProducto = async (idProducto) => {
+    const producto = buscarProductoPorId(idProducto);
+    const respuesta = await actualizar(urlListaCompra + idProducto, {
+      ...producto,
+      comprado: !producto.comprado,
+    });
+
+    if (respuesta.ok) {
+      setListaCompra(
+        listaCompra.map((articulo) =>
+          articulo.id === idProducto
+            ? { ...articulo, comprado: !articulo.comprado }
+            : articulo
+        )
+      );
+    }
+  };
   const crearProducto = () => navigate("/productos/crear-producto");
   const modificarProducto = (id) => navigate(`/productos/${id}`);
-  const eliminarProducto = (idProducto) =>
-    setListaCompra(
-      listaCompra.filter((articulo) => articulo.id !== idProducto)
-    );
+  const eliminarProducto = async (idProducto) => {
+    const respuesta = await eliminar(urlListaCompra + idProducto);
+    if (respuesta.ok) {
+      setListaCompra(
+        listaCompra.filter((articulo) => articulo.id !== idProducto)
+      );
+    }
+  };
   return (
     <>
       <InfoArticulos accion={crearProducto}></InfoArticulos>

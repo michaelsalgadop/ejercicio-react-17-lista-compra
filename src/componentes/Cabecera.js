@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export const Cabecera = (props) => {
+export const Cabecera = () => {
   return (
     <header className="cabecera espaciado bloque-superior">
       <h1>Lista de la compra</h1>
